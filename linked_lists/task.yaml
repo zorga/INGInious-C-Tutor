@@ -1,0 +1,23 @@
+accessible: true
+author: Nicolas Ooghe
+context: implémentation de listes chaînées en C
+environment: graph
+groups: false
+limits:
+    memory: '5120'
+    output: '5210'
+    time: '120'
+name: 'Listes chaînées: ajouter un noeud en tête de liste chaînée'
+network_grading: true
+problems:
+    push:
+        type: code
+        language: c
+        name: Ajouter un élément en tête de la liste chaînée
+        header: Écrivez le corps de la fonction ``int push(node_t** headRef, int newData)``,
+            qui doit ajouter un noeud en tête de liste avec l'entier ``newData`` comme
+            valeur. Cette fonction a comme argument un pointeur de pointeur vers le
+            noeud en tête de liste, avant l'insertion du nouvel élément. La fonction
+            doit retourner ``0`` en cas de succès, ou un entier différent de zéro
+            en cas d'erreur.
+weight: 1.0

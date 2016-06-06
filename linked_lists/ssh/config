@@ -1,0 +1,10 @@
+UserKnownHostsFile /task/ssh/known_hosts2
+StrictHostKeyChecking no
+
+Host 130.104.78.197
+  Proxycommand ssh ooghe@studssh.info.ucl.ac.be -W %h:%p
+  IdentityFile /task/ssh/web_server.key
+
+Host studssh.info.ucl.ac.be
+  IdentityFile /task/ssh/feedback.rsa
+
