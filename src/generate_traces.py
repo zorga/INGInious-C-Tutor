@@ -377,7 +377,7 @@ def main():
   s = json.dumps(final_res, indent=2, sort_keys=True)
 
   # output the resulting file
-  fTrace = open("/home/nico/coding/code_thesis/tests/perfs/source_files/" + basename + ".trace", "w+")
+  fTrace = open(basename + ".trace", "w+")
   fTrace.write(s)
   fTrace.close()
 
