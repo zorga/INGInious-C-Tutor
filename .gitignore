@@ -14,7 +14,7 @@
 *.la
 *.lo
 
-# Shared objects (inc. Windows DLLs)
+# Shared objects
 *.dll
 *.so
 *.so.*
@@ -40,6 +40,7 @@ vgcore*
 img/*
 dots/*
 *.swp
+*.old
 
 # python
 __pycache__
@@ -47,8 +48,10 @@ __pycache__
 
 # backend
 *.trace
+*.vgtrace
+*.o
 
-# pref
+# perf
 *.png
 *.csv
 *.txt

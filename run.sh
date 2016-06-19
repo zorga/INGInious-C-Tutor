@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # Script used to run everything from Valgrind traces generation
 # to final traces and images uploading to the server at the
 # address : 130.104.78.197

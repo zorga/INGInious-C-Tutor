@@ -37,7 +37,6 @@ def main():
   else:
     plt.axis([0, TOTAL, 0, 100000])
 
-
   plt.xlabel("Amount of dynamically allocated node struct")
   plt.ylabel("Running time (ms)")
   fig.savefig(plotname)

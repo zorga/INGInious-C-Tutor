@@ -30,7 +30,6 @@ def main():
       result = [i, cpu_time]
       writer.writerow(result)
       i = i + 1
-
   resultFile.close()
   
 if __name__ == '__main__':
