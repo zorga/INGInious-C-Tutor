@@ -9,21 +9,8 @@ usage() {
   echo "./generate_feedback feedback source.c : to generate the extended feedback for the source.c program"
   exit 1
 }
-  
-#Check that arguments are given:
-if [ $# -eq 0 ]; then
-  usage
-  exit 1
-fi
 
-#If first command is "clean" remove all the generated files
-if [ "$1" == "clean" ]; then
-  #No second argument needed in this case:
-  if [ $# -gt 1 ]; then
-    usage
-    exit 1
-  fi
-
+clean() {
   if [ -e *.vgtrace ]; then
     rm *.vgtrace
   fi
@@ -43,8 +30,25 @@ if [ "$1" == "clean" ]; then
   if [ -d "dots" ]; then
     rm -rf dots/
   fi
+}
+ 
+#Check that arguments are given:
+if [ $# -eq 0 ]; then
+  usage
+  exit 1
+fi
 
-  exit 0
+#If first command is "clean" remove all the generated files
+if [ "$1" == "clean" ]; then
+  #No second argument needed in this case:
+  if [ $# -gt 1 ]; then
+    usage
+    exit 1
+    
+  else
+    clean
+    exit 0
+  fi
 
 #If first command is "feedback" check if the second argument is a .c file
 elif [ "$1" == "feedback" ]; then
@@ -73,6 +77,9 @@ fi
 SUFIX=".c"
 BASENAME=${SRCFILE%$SUFIX}
 
+#Clean previous files if present:
+clean
+
 #Compiling the code:
 gcc_out=$(gcc -ggdb -O0 -fno-omit-frame-pointer $SRCFILE -o $BASENAME.o 2>&1)
 if [ $? -ne 0 ]; then
@@ -81,7 +88,7 @@ if [ $? -ne 0 ]; then
 fi
 
 #Getting the Valgrind execution log file:
-vg_out=$(../../valgrind-3.11.0/inst/bin/valgrind --tool=memcheck --source-filename=$SRCFILE --trace-filename=$BASENAME.vgtrace ./$BASENAME.o 2>&1)
+vg_out=$(valgrind-3.11.0/inst/bin/valgrind --tool=memcheck --source-filename=$SRCFILE --trace-filename=$BASENAME.vgtrace ./$BASENAME.o 2>&1)
 if [ $? -ne 0 ]; then
   echo "Error while getting the valgrind log files"
   exit 1
@@ -93,7 +100,7 @@ if [ ! -e "$BASENAME.vgtrace" ]; then
   exit 1
 fi
 
-int_out=$(python2.7 ../../src/generate_traces.py $BASENAME 2>&1)
+int_out=$(python2.7 src/generate_traces.py $BASENAME 2>&1)
 if [ $? -ne 0 ]; then
   echo "Error during trace file construction"
   exit 1
@@ -109,7 +116,7 @@ if [ ! -e "$BASENAME.trace" ]; then
   exit 1
 fi
 
-graph_out=$(python2.7 ../../src/generate_graph_from_traces.py $BASENAME.trace)
+graph_out=$(python2.7 src/generate_graph_from_traces.py $BASENAME.trace)
 if [ $? -ne 0 ]; then
   echo "Error while building the graphs"
   exit 1
