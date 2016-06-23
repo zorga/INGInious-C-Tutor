@@ -10,6 +10,8 @@ The graphs can be generated using the `generate_feedback.sh` script, passing the
 
 To install to modified Valgrind, run the `install_modified_valgrind.sh` script.
 
+In the `linked_lists` directory, there are all the required files (including the previously mentioned `run` file) to build an INGInious exercise using the tool. However, the private key needed to access the web server has been omitted for security issues. The same structure can be used to build other exercises. Unit tests can be written to check the submissions correctness, then the improved feedback can be built as described in the `run` file and returned in feedback messages displayed to students wether they have succeeded or not.
+
 ## Dependencies
 - Python 2
 - pyGraphViz
