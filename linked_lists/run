@@ -2,14 +2,19 @@
 
 # To get student input :
 getinput push > push.c
+# Include the student code in the global source file :
+# This is required in order to have the student's code in the feedback page !
+# Adding tabs before each lines of the submitted code:
+sed_tab_output=$(sed -i 's/^/  /' push.c 2>&1)
+# Replace the include macro of the global source file with the student's code:
+include_output=$(sed -i '/push.c/r push.c' thesis_LinkedList.c 2>&1)
+# Remove the include line after adding the student code:
+sed_del_output=$(sed -i -e '219d' thesis_LinkedList.c 2>&1)
 
 # Compile the code with the included student's solution
 compiler_output=$(gcc -std=c99 -ggdb -O0 -fno-omit-frame-pointer thesis_LinkedList.c -o thesis_LinkedList.o 2>&1)
 if [ $? -ne 0 ]; then
-  feedback --result failed --feedback "Le programme ne compile pas::
-
-  $(echo "blah: $compiler_output")
-  "
+  feedback --result failed --feedback "Votre programme ne compile pas"
   exit 1
 else
   feedback --result success --feedback "Le programme compile"
@@ -18,36 +23,12 @@ fi
 # Call hacked Valgrind to get the execution logs
 export VALGRIND_LIB="/task/backend/valgrind-3.11.0/inst/lib/valgrind"
 valgrind_output=$( backend/valgrind-3.11.0/inst/bin/valgrind --source-filename=thesis_LinkedList.c --trace-filename=thesis_LinkedList.vgtrace ./thesis_LinkedList.o 2>&1)
-if [ $? -ne 0 ]; then
-  feedback --result failed --feedback "Erreur avec Valgrind::
-
-  $(echo "Valgrind: $valgrind_output")
-  "
-  exit 1
-else
-  feedback --result success --feedback "Valgrind : Ok"
-fi
 
 # Build the execution traces out of the Valgrind logs
-gen_trace_ouput=$(backend/generate_traces.py thesis_LinkedList > thesis_LinkedList.trace || true)
-if [ $? -ne 0 ]; then
-  feedback --result failed --feedback "Erreur avec le script pour générer la trace d'execution"
-  exit 1
-else
-  feedback --result success --feedback "Generation de la trace ok"
-fi
+gen_trace_ouput=$(backend/generate_traces.py thesis_LinkedList)
 
 # Build the execution graphs from the previously built exec traces
 gen_graph_output=$(backend/generate_graph_from_traces.py thesis_LinkedList.trace 2>&1)
-if [ $? -ne 0 ]; then
-  feedback --result failed --feedback "Erreur avec le script pour générer les images::
-
-  $(echo "blehbleh: $gen_graph_output")
-  "
-  exit 1
-else
-  feedback --result success --feedback "Generation des images ok"
-fi
 
 #####################################
 # Generating the extended feedback: #
@@ -58,74 +39,33 @@ id=$RANDOM
 dir="stud_feedback_$id"
 mkdir $dir
 
-if [ ! -d "$dir" ]; then
-  feedback --result failed --feedback "Failed to create directory $dir"
-  exit 1
-else
-  feedback --result success --feedback "created $dir directory ok"
-fi
-
 #execution_images subdir of the student's feedback dir
 cd $dir
-mkdir "execution_images"
-
-if [ ! -d "execution_images" ]; then
-  feedback --result failed --feedback "Failed to create directory execution_images"
-  exit 1
-else
-  feedback --result success --feedback "created execution_images directory ok"
-fi
-
+mkdir -p "execution_images"
 cd ..
 
 #Copy the execution graphs to the execution_images dir of the student
 cp_output=$(cp -r img/* $dir/execution_images/)
-if [ $? -ne 0 ]; then
-  feedback --result failed --feedback "Erreur lors de la copie de img/* vers $dir/execution_images/::
 
-  $(echo "copy: $cp_output")
-  "
-  exit 1
-else
-  feedback --result success --feedback "Fichiers images copiés"
-fi
-
-#Check if the trace file has been generated properly...
-if [ ! -f "thesis_LinkedList.trace" ]; then
-  feedback --result failed --feedback "thesis_LinkedList.trace doesn't exist"
-  exit 1
-else
-  feedback --result success --feedback "thesis_LinkedList.trace exists"
-fi
-
-#... and copy it in the student's directory
+#Copy the intermediate trace file in the student's directory
 cp thesis_LinkedList.trace $dir
-
-# check if the html template to build the feedback is accessible
-if [ ! -f "feedback_demo.html" ]; then
-  feedback --result failed --feedback "feedback_demo.html doesn't exist"
-  exit 1
-else
-  feedback --result success --feedback "feedback_demo.html exists"
-fi
 
 # Crate a unique feedback from the template
 # and move it to the student dir
-cp_feedback=$(cp feedback_demo.html demo_$id.html 2>&1)
+cp_feedback=$(cp demo.html demo_$id.html 2>&1)
 cp ./demo_$id.html $dir
 
 # Copy the student's directory to the web-server
 # and return the address to this personal feedback
-export HOME=/task
-#scp_output=$(scp -rv $dir -F /task/.ssh/config inginious@130.104.78.197:/var/www/html/ 2>&1)
-#scp_output=$(scp -rv $dir -F .ssh/config ooghe@studssh.info.ucl.ac.be:. 2>&1)
-scp_output=$(rsync -avz -e 'ssh -vvv -F /task/ssh/config -i /task/ssh/web_server.key -o UserKnownHostsFile=/task/ssh/known_hosts2 -o GlobalKnownHostsFile=/task/ssh/known_hosts2' $dir inginious@130.104.78.197:/var/www/html/ 2>&1)
+# export HOME=/task
+scp_output=$(scp -vvv -F /ssh/config -r $dir inginious@130.104.78.197:/var/www/html/)
 if [ $? -ne 0 ]; then
   feedback --result failed --feedback "Erreur scp::
   $(echo "scp: $scp_output")
   "
   exit 1
 else
-  feedback --result success --feedback "Improved feedback at URL : http://130.104.78.197/$dir/demo_$id.html !"
+  #feedback --result success --feedback "Improved feedback at URL : http://130.104.78.197/$dir/demo_$id.html !"
+  feedback --result success --feedback "Improved feedback at URL : http://localhost:9000/$dir/demo_$id.html !"
 fi
 

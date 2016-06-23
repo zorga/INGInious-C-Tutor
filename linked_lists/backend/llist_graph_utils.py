@@ -1,4 +1,11 @@
 #!/usr/bin/env python2
+"""
+Python module made to handle Linked List based exercises for the
+extended feedback tool for INGInious platform at UCL-EPL
+"""
+
+__author__  = "Nicolas Ooghe"
+
 import sys
 from pygraphviz import *
 from pprint import pprint
@@ -12,7 +19,7 @@ debug = 0
 
 
 
-def build_graph_from(obj, i):
+def build_graph_from(obj):
   """
   This function builds the graphics representation of an execution point and output the
   source-code of the graph and the graph itself in SVG format.
@@ -21,6 +28,9 @@ def build_graph_from(obj, i):
     obj (dict): a dictionnary describing the current execution point
 
     i (int): The sequence number of the current execution point
+
+  Returns:
+    graph object: the complete graph corresponding to an exec point
 
   """
   final_graph = init_exec_point_graph()
@@ -38,11 +48,9 @@ def build_graph_from(obj, i):
   heapG = make_heap_graph(heap, heapG)
   frames = obj["frames"]
   frameG = make_stack_frames_graph(frames, frameG, final_graph)
+  
+  return final_graph
 
-  # Output the resulting graph to file
-  graph_file_name = "exec_point_" + str(i)
-  output_graph(final_graph, graph_file_name)
-      
 
 
 def make_heap_graph(heap, heapG):
@@ -85,7 +93,7 @@ def make_heap_graph(heap, heapG):
         if prev_node_info_list:
           for p in prev_node_info_list:
             if p[3] == var_info[0]:
-              heapG.add_edge(str(p[0]), str(var_info[0]), headport="addr", tailport="next", style="filled", label="next", color="#3399FF", penwidth="2")
+              heapG.add_edge(str(p[0]), str(var_info[0]), headport="addr", tailport="next", style="filled", color="#3399FF", penwidth="2")
             elif var_info[3] == p[0]:
               heapG.add_edge(str(var_info[0]), str(p[0]), headport="addr", tailport="next", style="filled", label="next", color="#3399FF", penwidth="2")
         prev_node_info_list.append(var_info)
@@ -126,10 +134,10 @@ def make_stack_frames_graph(frames, frameG, final_graph):
     current_frame_graph.graph_attr["rankdir"] = "TB"
     current_frame_graph.graph_attr["rank"] = "same"
     current_frame_graph.graph_attr["label"] = "Function : " + str(frame["func_name"])
-    if (frame["func_name"] == "main"):
-      current_frame_graph.graph_attr["color"] = "#3399FF"
+    if (frame["is_highlighted"]):
+      current_frame_graph.graph_attr["color"] = "#00CC00"
     else:
-      current_frame_graph.graph_attr["color"] = "#33CC33"
+      current_frame_graph.graph_attr["color"] = "#0059B3"
 
     # Dummy node (hack to link the clusters and avoid overlaps) :
     current_frame_graph.add_node("DUMMY_" + str(frame["func_name"]))
@@ -196,15 +204,22 @@ def retrieve_heap_var_info(HeapVar):
   vInfo = []
   if (len(HeapVar) > 2):
     # If the size of the HeapVar list (which is a value in the 'heap' dict, describing
-    # a dynamically allocated variable), is smaller of equals to 2, it means the associated
+    # a dynamically allocated variable), is smaller or equals to 2, it means the associated
     # data have been freed at this point of the execution
     varInfo = HeapVar[2]
+    varType = varInfo[0]
+
+    # The node doesn't belong to a Linked List:
+    if not varType == "C_STRUCT":
+      return None
+
     address = varInfo[1]
     struct_type = varInfo[2]
     data_field = varInfo[3]
     next_field = varInfo[4]
     data_value = data_field[1][3]
     next_value = next_field[1][3]
+
     # Getting the list to return, ready :
     vInfo = [address, struct_type, data_value, next_value]
     vInfo[:] = [x if x != "<UNINITIALIZED>" else "uninitialized" for x in vInfo]
@@ -235,7 +250,7 @@ def init_exec_point_graph():
   # Defining Frames cluster
   clusFrame = G.add_subgraph(name = "clusterFrames")
   clusFrame.graph_attr["rankdir"] = "LR"
-  clusFrame.graph_attr["color"] = "#FF9900"
+  clusFrame.graph_attr["color"] = "#003366"
   clusFrame.graph_attr["label"] = "Stack Frames"
   #clusFrame.graph_attr["rank"] = "same"
   # Dummy node (hack to link the clusters and avoir overlaps) :
@@ -262,20 +277,3 @@ def init_exec_point_graph():
 
   return G
 
-
-
-def output_graph(graph, name):
-  """
-  A simple function to ouput the source-code of the produced graph
-  and the SVG files containing the graphics
-
-  Args:
-    graph (graph object): the final graph of the current execution point
-
-    name (String): the name of the current graph
-
-  """
-  graph.layout(prog="dot")
-  graph.draw("img/" + name + ".png")
-  graph.write("dots/" + name + ".dot")
-  

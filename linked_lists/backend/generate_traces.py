@@ -1,17 +1,18 @@
 #!/bin/python2.7
-# Converts a trace created by the Valgrind C backend to a format that
-# will be used by the frontend to generate the graphs representing the
-# execution of a C program
+"""
+Converts a trace created by the Valgrind C backend to a format that
+will be used by the frontend to generate the graphs representing the
+execution of a C program
 
-# Originally created 2015-10-04 by Philip Guo for his Online Python Tutor tool
-# Many thanks to him ! Link : http://pgbovine.net/rosetta/c-demo.html
+Originally created 2015-10-04 by Philip Guo for his Online Python Tutor tool
+Many thanks to him ! Link : http://pgbovine.net/rosetta/c-demo.html
 
-# Hacked by Nicolas Ooghe for his master thesis in Computer Sciences at the
-# Universite Catholique de Louvain
+Hacked by Nicolas Ooghe for his master thesis in Computer Sciences at the
+Universite Catholique de Louvain
 
-# pass in the $basename of a program. assumes that the Valgrind-produced
-# trace is $basename.vgtrace and the source file is $basename.{c,cpp}
-
+pass in the $basename of a program. assumes that the Valgrind-produced
+trace is $basename.vgtrace and the source file is $basename.{c,cpp}
+"""
 
 
 import json
@@ -19,8 +20,6 @@ import os
 import pprint
 import sys
 from optparse import OptionParser
-
-# Global variables definitions :
 
 # This list will contain all the execution points record from the Valgrind trace file
 # if it's successfully parsed
@@ -238,6 +237,11 @@ def setEvents(ExecutionPoints, success):
     else:
       finalExecPoints[-1]['event'] = 'exception'
       finalExecPoints[-1]['exception_msg'] = 'code crash !'
+    # Hack to handle segmentation fault cases (for INGInious for now) :
+    # If the program doesn't raise a segmentation fault, it would normally
+    # finish its execution with the main function return :
+    if not finalExecPoints[-1]['func_name'] == "main":
+      finalExecPoints[-1]['event'] = 'segfault'
 
     # The 'finalExecPoints' list should not have the same size 'ExecutionPoints' list
     assert len(finalExecPoints) <= len(ExecutionPoints)
@@ -295,7 +299,7 @@ def filterExecPoints():
   arguments for this function.
 
   Returns:
-    list: a list of execution point in the final trace format if their are no bogus
+    list: a list of execution point in the final trace format if there are no bogus
     ones in the original list.
 
   TODO : To be improved
@@ -372,11 +376,10 @@ def main():
   # use sort_keys to get some sensible ordering on object keys
   s = json.dumps(final_res, indent=2, sort_keys=True)
 
-  # Creating a javaScript variable if required by the user
-  if options.js_varname:
-    print('var ' + options.js_varname + ' = ' + s + ';')
-  else:
-    print(s)
+  # output the resulting file
+  fTrace = open(basename + ".trace", "w+")
+  fTrace.write(s)
+  fTrace.close()
 
 
 
