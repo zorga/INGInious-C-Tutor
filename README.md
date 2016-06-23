@@ -10,10 +10,10 @@ The graphs can be generated using the `generate_feedback.sh` script, passing the
 
 To install to modified Valgrind, run the `install_modified_valgrind.sh` script.
 
-## Dependencies :
+## Dependencies
 - Python 2
 - pyGraphViz
 - GraphViz
 
-## Demo :
-A small video showing the tool when it is used with INGInious can be found [here](https://www.youtube.com/watch?v=l2hn_xq6B_g).
+## Demo
+A small demo video showing the tool being used in with INGInious can be found [here](https://www.youtube.com/watch?v=l2hn_xq6B_g).
