@@ -19,4 +19,6 @@ In the `linked_lists` directory, there are all the required files (including the
 
 ## Demo
 A small demo video showing the tool being used in with INGInious can be found here :
-[![Everything Is AWESOME](screenshotVideo.png)](https://www.youtube.com/watch?v=l2hn_xq6B_g "INGInious-C-Tutor Demo")
+
+[![INGInious-C-Tutor Demonstration](http://i.imgur.com/gVol00U.png)](https://www.youtube.com/watch?v=l2hn_xq6B_g "INGInious-C-Tutor Demo")
+
