@@ -18,4 +18,5 @@ In the `linked_lists` directory, there are all the required files (including the
 - GraphViz
 
 ## Demo
-A small demo video showing the tool being used in with INGInious can be found [here](https://www.youtube.com/watch?v=l2hn_xq6B_g).
+A small demo video showing the tool being used in with INGInious can be found here :
+[![Everything Is AWESOME](screenshotVideo.png)](https://www.youtube.com/watch?v=l2hn_xq6B_g "INGInious-C-Tutor Demo")
